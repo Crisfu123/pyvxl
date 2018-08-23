@@ -6,7 +6,7 @@ import logging
 from pywindaemon import Daemon, Task, import_args
 from pyvxl.vxl import VxlCan
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(filename="log.txt", level=logging.INFO)
 
 # TODO: Make sure that all locations where dbc data was assumed to be updated in Vector are now
 #       properly updating these values in the daemon as well
@@ -47,27 +47,34 @@ class Transmit(Daemon):
         """Begin transmitting a message periodically."""
         if not self.is_daemon():
             if msg.id in self.messages:
-                self.update_msg(msg)
-            else:
-                self.tasks[msg.id] = Task('transmit', args=(msg, msg_data),
-                                          period=msg.period)
-                msg.sending = True
-                self.messages[msg.id] = msg
-                self.add_task(self.tasks[msg.id])
+                # self.update_msg(msg)
+            # else:
+                # self.tasks[msg.id] = Task('transmit', args=(msg, msg_data),
+                                          # period=msg.period)
+                # msg.sending = True
+                # self.messages[msg.id] = msg
+                # self.add_task(self.tasks[msg.id])
+                    self.remove(msg)
+            logging.debug('add {:X} {:X}'.format(msg.id, msg.data))
+            self.tasks[msg.id] = Task('transmit', args=(msg, msg_data),
+                                  period=msg.period)
+            msg.sending = True
+            self.messages[msg.id] = msg
+            self.add_task(self.tasks[msg.id])
         else:
             logging.error('Transmit.add() called from the Daemon!')
 
-    def remove(self, msg_id):
+    def remove(self, msg):
         """Stop transmitting a message periodically."""
         if not self.is_daemon():
-            if msg_id in self.messages:
-                self.remove_task(self.tasks[msg_id])
-                self.tasks.pop(msg_id)
-                msg = self.messages.pop(msg_id)
+            if msg.id in self.messages:
+                self.remove_task(self.tasks[msg.id])
+                self.tasks.pop(msg.id)
+                msg = self.messages.pop(msg.id)
                 msg.sending = False
             else:
                 logging.warning('Msg ID {} is not currently '
-                                'being sent'.format(msg_id))
+                                'being sent'.format(msg.id))
         else:
             logging.error('Transmit.remove() called from the Daemon!')
 

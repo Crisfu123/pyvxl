@@ -140,7 +140,7 @@ class CAN(object):
             logging.debug('send_signal - msg {} - data {}'.format(msg.id, data))
 
             if msg.period == 0 or send_once:
-                ret = self.tx_proc.transmit(msg)
+                ret = self.tx_proc.transmit(msg, data)
             else:
                 ret = self.tx_proc.add(msg, data)
         return ret

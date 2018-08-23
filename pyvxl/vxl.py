@@ -31,7 +31,7 @@ memcpy = libc.memcpy
 CAN_SUPPORTED = 0x10000
 CAN_BUS_TYPE = 1
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(filename='log.txt', level=logging.DEBUG)
 
 
 class VxlCan(object):
